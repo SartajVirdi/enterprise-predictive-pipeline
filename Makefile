@@ -1,9 +1,9 @@
-.PHONY: init warehouse build train serve dashboard clean
+.PHONY: init warehouse build train serve dashboard pipeline clean
 
 # 1. Automatic Python virtual workspace configuration
 init:
 	python3 -m venv .venv
-	. .venv/bin/activate && pip install -r requirements.txt && pip install streamlit
+	. .venv/bin/activate && pip install -r requirements-dev.txt
 
 # 2. Ingest raw logs and build DuckDB schema
 warehouse:
@@ -27,4 +27,3 @@ dashboard:
 
 # 7. Complete automated data stream refresh loop
 pipeline: warehouse build train
-
