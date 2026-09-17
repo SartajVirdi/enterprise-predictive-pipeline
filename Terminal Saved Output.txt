@@ -1,0 +1,787 @@
+Last login: Mon Sep 14 13:48:05 on ttys000
+taz@Atom ~ % mkdir enterprise-predictive-pipeline
+taz@Atom ~ % cd enterprise-predictive-pipeline
+taz@Atom enterprise-predictive-pipeline % mkdir -p data warehouse/models/staging warehouse/models/marts/features warehouse/macros warehouse/snapshots warehouse/tests ml_service/feature_store ml_service/training ml_service/inference ml_service/models/artifacts ml_service/config ml_service/api
+
+taz@Atom enterprise-predictive-pipeline % touch .gitignore requirements.txt
+taz@Atom enterprise-predictive-pipeline % ls -a
+
+.			.DS_Store		data			requirements.txt
+..			.gitignore		ml_service		warehouse
+taz@Atom enterprise-predictive-pipeline % cat > .gitignore << 'EOF'
+# macOS system files
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+.Spotlight-V100
+.Trashes
+
+# Python environments
+.venv/
+venv/
+env/
+ENV/
+__pycache__/
+*.py[cod]
+*.pyo
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Data artifacts
+data/*.csv
+warehouse.db
+*.duckdb
+
+# IDE configs
+.vscode/
+.idea/
+
+# dbt
+logs/
+target/
+dbt_packages/
+dbt_modules/
+.user.yml
+
+# Env vars / secrets
+.env
+.env.*
+
+# Jupyter
+.ipynb_checkpoints/
+
+# OS misc
+Thumbs.db
+EOF
+taz@Atom enterprise-predictive-pipeline % python3 generate_mock_data.py
+/Library/Developer/CommandLineTools/usr/bin/python3: can't open file '/Users/taz/enterprise-predictive-pipeline/generate_mock_data.py': [Errno 2] No such file or directory
+taz@Atom enterprise-predictive-pipeline % touch generate_mock_data.py
+taz@Atom enterprise-predictive-pipeline % nano init_warehouse.py
+taz@Atom enterprise-predictive-pipeline % python3 generate_mock_data.py
+
+Traceback (most recent call last):
+  File "/Users/taz/enterprise-predictive-pipeline/generate_mock_data.py", line 11, in <module>
+    import duckdb
+ModuleNotFoundError: No module named 'duckdb'
+taz@Atom enterprise-predictive-pipeline % python3 -m venv .venv
+taz@Atom enterprise-predictive-pipeline % source .venv/bin/activate
+
+(.venv) taz@Atom enterprise-predictive-pipeline % pip install -r requirements.txt
+Collecting dbt-duckdb==1.9.4
+  Downloading dbt_duckdb-1.9.4-py3-none-any.whl (72 kB)
+     |████████████████████████████████| 72 kB 537 kB/s 
+Collecting pandas==2.2.3
+  Downloading pandas-2.2.3-cp39-cp39-macosx_11_0_arm64.whl (11.3 MB)
+     |████████████████████████████████| 11.3 MB 4.5 MB/s 
+Collecting xgboost==2.1.3
+  Downloading xgboost-2.1.3-py3-none-macosx_12_0_arm64.whl (1.9 MB)
+     |████████████████████████████████| 1.9 MB 3.6 MB/s 
+Collecting fastapi==0.115.6
+  Downloading fastapi-0.115.6-py3-none-any.whl (94 kB)
+     |████████████████████████████████| 94 kB 5.5 MB/s 
+Collecting uvicorn[standard]==0.34.0
+  Downloading uvicorn-0.34.0-py3-none-any.whl (62 kB)
+     |████████████████████████████████| 62 kB 3.2 MB/s 
+Collecting pydantic==2.10.4
+  Downloading pydantic-2.10.4-py3-none-any.whl (431 kB)
+     |████████████████████████████████| 431 kB 4.8 MB/s 
+Collecting python-dotenv==1.0.1
+  Downloading python_dotenv-1.0.1-py3-none-any.whl (19 kB)
+Collecting dbt-common<2,>=1
+  Downloading dbt_common-1.34.2-py3-none-any.whl (87 kB)
+     |████████████████████████████████| 87 kB 3.5 MB/s 
+Collecting dbt-adapters<2,>=1
+  Downloading dbt_adapters-1.17.3-py3-none-any.whl (170 kB)
+     |████████████████████████████████| 170 kB 4.2 MB/s 
+Collecting duckdb>=1.0.0
+  Downloading duckdb-1.4.5-cp39-cp39-macosx_11_0_arm64.whl (13.7 MB)
+     |████████████████████████████████| 13.7 MB 10.1 MB/s 
+Collecting dbt-core>=1.8.0
+  Downloading dbt_core-1.10.23-py3-none-any.whl (988 kB)
+     |████████████████████████████████| 988 kB 5.8 MB/s 
+Collecting python-dateutil>=2.8.2
+  Using cached python_dateutil-2.9.0.post0-py2.py3-none-any.whl (229 kB)
+Collecting numpy>=1.22.4
+  Using cached numpy-2.0.2-cp39-cp39-macosx_14_0_arm64.whl (5.3 MB)
+Collecting tzdata>=2022.7
+  Downloading tzdata-2026.4-py2.py3-none-any.whl (347 kB)
+     |████████████████████████████████| 347 kB 9.9 MB/s 
+Collecting pytz>=2020.1
+  Downloading pytz-2026.3.post1-py2.py3-none-any.whl (508 kB)
+     |████████████████████████████████| 508 kB 9.4 MB/s 
+Collecting scipy
+  Using cached scipy-1.13.1-cp39-cp39-macosx_12_0_arm64.whl (30.3 MB)
+Collecting typing-extensions>=4.8.0
+  Using cached typing_extensions-4.16.0-py3-none-any.whl (45 kB)
+Collecting starlette<0.42.0,>=0.40.0
+  Downloading starlette-0.41.3-py3-none-any.whl (73 kB)
+     |████████████████████████████████| 73 kB 4.5 MB/s 
+Collecting click>=7.0
+  Using cached click-8.1.8-py3-none-any.whl (98 kB)
+Collecting h11>=0.8
+  Using cached h11-0.16.0-py3-none-any.whl (37 kB)
+Collecting pyyaml>=5.1
+  Using cached pyyaml-6.0.3-cp39-cp39-macosx_11_0_arm64.whl (174 kB)
+Collecting watchfiles>=0.13
+  Downloading watchfiles-1.1.1-cp39-cp39-macosx_11_0_arm64.whl (396 kB)
+     |████████████████████████████████| 396 kB 9.2 MB/s 
+Collecting uvloop!=0.15.0,!=0.15.1,>=0.14.0
+  Downloading uvloop-0.22.1-cp39-cp39-macosx_10_9_universal2.whl (1.3 MB)
+     |████████████████████████████████| 1.3 MB 7.8 MB/s 
+Collecting httptools>=0.6.3
+  Downloading httptools-0.8.0-cp39-cp39-macosx_11_0_arm64.whl (114 kB)
+     |████████████████████████████████| 114 kB 9.7 MB/s 
+Collecting websockets>=10.4
+  Downloading websockets-15.0.1-cp39-cp39-macosx_11_0_arm64.whl (173 kB)
+     |████████████████████████████████| 173 kB 9.9 MB/s 
+Collecting annotated-types>=0.6.0
+  Downloading annotated_types-0.7.0-py3-none-any.whl (13 kB)
+Collecting pydantic-core==2.27.2
+  Downloading pydantic_core-2.27.2-cp39-cp39-macosx_11_0_arm64.whl (1.8 MB)
+     |████████████████████████████████| 1.8 MB 6.5 MB/s 
+Collecting mashumaro[msgpack]<3.15,>=3.9
+  Downloading mashumaro-3.14-py3-none-any.whl (92 kB)
+     |████████████████████████████████| 92 kB 114 kB/s 
+Collecting dbt-protos<2.0,>=1.0.291
+  Downloading dbt_protos-1.0.565-py3-none-any.whl (260 kB)
+     |████████████████████████████████| 260 kB 7.2 MB/s 
+Collecting agate<2.0,>=1.0
+  Downloading agate-1.14.2-py3-none-any.whl (95 kB)
+     |████████████████████████████████| 95 kB 4.8 MB/s 
+Collecting protobuf<7.0,>=6.0
+  Downloading protobuf-6.33.6-cp39-abi3-macosx_10_9_universal2.whl (427 kB)
+     |████████████████████████████████| 427 kB 8.9 MB/s 
+Collecting leather>=0.3.2
+  Downloading leather-0.4.1-py3-none-any.whl (30 kB)
+Collecting Babel>=2.0
+  Using cached babel-2.18.0-py3-none-any.whl (10.2 MB)
+Collecting parsedatetime!=2.5,>=2.1
+  Downloading parsedatetime-2.6-py3-none-any.whl (42 kB)
+     |████████████████████████████████| 42 kB 2.4 MB/s 
+Collecting pytimeparse>=1.1.5
+  Downloading pytimeparse-1.1.8-py2.py3-none-any.whl (10.0 kB)
+Collecting isodate>=0.5.4
+  Downloading isodate-0.7.2-py3-none-any.whl (22 kB)
+Collecting python-slugify>=1.2.1
+  Downloading python_slugify-8.0.4-py2.py3-none-any.whl (10 kB)
+Collecting colorama<0.5,>=0.3.9
+  Downloading colorama-0.4.6-py2.py3-none-any.whl (25 kB)
+Collecting jsonschema<5.0,>=4.0
+  Using cached jsonschema-4.25.1-py3-none-any.whl (90 kB)
+Collecting jinja2<4,>=3.1.3
+  Using cached jinja2-3.1.6-py3-none-any.whl (134 kB)
+Collecting deepdiff<9.0,>=7.0
+  Downloading deepdiff-8.6.2-py3-none-any.whl (91 kB)
+     |████████████████████████████████| 91 kB 5.4 MB/s 
+Collecting agate<2.0,>=1.0
+  Downloading agate-1.9.1-py2.py3-none-any.whl (95 kB)
+     |████████████████████████████████| 95 kB 6.3 MB/s 
+Collecting requests<3.0.0
+  Using cached requests-2.32.5-py3-none-any.whl (64 kB)
+Collecting pathspec<0.13,>=0.9
+  Downloading pathspec-0.12.1-py3-none-any.whl (31 kB)
+Collecting isodate>=0.5.4
+  Downloading isodate-0.6.1-py2.py3-none-any.whl (41 kB)
+     |████████████████████████████████| 41 kB 2.2 MB/s 
+Collecting daff>=1.3.46
+  Downloading daff-1.4.2-py3-none-any.whl (144 kB)
+     |████████████████████████████████| 144 kB 10.1 MB/s 
+Collecting dbt-extractor<=0.6,>=0.5.0
+  Downloading dbt_extractor-0.6.0-cp39-abi3-macosx_10_12_x86_64.macosx_11_0_arm64.macosx_10_12_universal2.whl (790 kB)
+     |████████████████████████████████| 790 kB 8.7 MB/s 
+Collecting sqlparse<0.5.5,>=0.5.0
+  Downloading sqlparse-0.5.4-py3-none-any.whl (45 kB)
+     |████████████████████████████████| 45 kB 6.3 MB/s 
+Collecting packaging>20.9
+  Downloading packaging-26.3-py3-none-any.whl (129 kB)
+     |████████████████████████████████| 129 kB 9.1 MB/s 
+Collecting networkx<4.0,>=2.3
+  Using cached networkx-3.2.1-py3-none-any.whl (1.6 MB)
+Collecting dbt-semantic-interfaces<0.10,>=0.9.0
+  Downloading dbt_semantic_interfaces-0.9.0-py3-none-any.whl (147 kB)
+     |████████████████████████████████| 147 kB 10.7 MB/s 
+Collecting snowplow-tracker<2.0,>=1.0.2
+  Downloading snowplow_tracker-1.1.0-py3-none-any.whl (44 kB)
+     |████████████████████████████████| 44 kB 5.3 MB/s 
+Collecting more-itertools<11.0,>=8.0
+  Downloading more_itertools-10.8.0-py3-none-any.whl (69 kB)
+     |████████████████████████████████| 69 kB 10.1 MB/s 
+Collecting importlib-metadata<9,>=6.0
+  Using cached importlib_metadata-8.7.1-py3-none-any.whl (27 kB)
+Collecting orderly-set<6,>=5.4.1
+  Downloading orderly_set-5.5.0-py3-none-any.whl (13 kB)
+Collecting zipp>=3.20
+  Using cached zipp-3.23.1-py3-none-any.whl (10 kB)
+Collecting six
+  Using cached six-1.17.0-py2.py3-none-any.whl (11 kB)
+Collecting MarkupSafe>=2.0
+  Using cached markupsafe-3.0.3-cp39-cp39-macosx_11_0_arm64.whl (12 kB)
+Collecting attrs>=22.2.0
+  Using cached attrs-26.1.0-py3-none-any.whl (67 kB)
+Collecting rpds-py>=0.7.1
+  Using cached rpds_py-0.27.1-cp39-cp39-macosx_11_0_arm64.whl (354 kB)
+Collecting jsonschema-specifications>=2023.03.6
+  Using cached jsonschema_specifications-2025.9.1-py3-none-any.whl (18 kB)
+Collecting referencing>=0.28.4
+  Using cached referencing-0.36.2-py3-none-any.whl (26 kB)
+Collecting msgpack>=0.5.6
+  Downloading msgpack-1.1.2-cp39-cp39-macosx_11_0_arm64.whl (84 kB)
+     |████████████████████████████████| 84 kB 7.8 MB/s 
+Collecting text-unidecode>=1.3
+  Downloading text_unidecode-1.3-py2.py3-none-any.whl (78 kB)
+     |████████████████████████████████| 78 kB 2.2 MB/s 
+Collecting charset_normalizer<4,>=2
+  Downloading charset_normalizer-3.5.1-cp39-cp39-macosx_10_9_universal2.whl (368 kB)
+     |████████████████████████████████| 368 kB 5.8 MB/s 
+Collecting urllib3<3,>=1.21.1
+  Using cached urllib3-2.6.3-py3-none-any.whl (131 kB)
+Collecting certifi>=2017.4.17
+  Downloading certifi-2026.7.22-py3-none-any.whl (136 kB)
+     |████████████████████████████████| 136 kB 10.9 MB/s 
+Collecting idna<4,>=2.5
+  Downloading idna-3.19-py3-none-any.whl (68 kB)
+     |████████████████████████████████| 68 kB 8.8 MB/s 
+Collecting anyio<5,>=3.4.0
+  Using cached anyio-4.12.1-py3-none-any.whl (113 kB)
+Collecting exceptiongroup>=1.0.2
+  Using cached exceptiongroup-1.3.1-py3-none-any.whl (16 kB)
+Installing collected packages: typing-extensions, rpds-py, attrs, text-unidecode, six, referencing, urllib3, pytimeparse, python-slugify, protobuf, parsedatetime, orderly-set, msgpack, mashumaro, MarkupSafe, leather, jsonschema-specifications, isodate, idna, charset-normalizer, certifi, Babel, zipp, requests, python-dateutil, pydantic-core, pathspec, jsonschema, jinja2, deepdiff, dbt-protos, colorama, annotated-types, agate, pyyaml, pytz, pydantic, more-itertools, importlib-metadata, exceptiongroup, dbt-common, click, sqlparse, snowplow-tracker, packaging, numpy, networkx, h11, dbt-semantic-interfaces, dbt-extractor, dbt-adapters, daff, anyio, websockets, watchfiles, uvloop, uvicorn, tzdata, starlette, scipy, python-dotenv, httptools, duckdb, dbt-core, xgboost, pandas, fastapi, dbt-duckdb
+Successfully installed Babel-2.18.0 MarkupSafe-3.0.3 agate-1.9.1 annotated-types-0.7.0 anyio-4.12.1 attrs-26.1.0 certifi-2026.7.22 charset-normalizer-3.5.1 click-8.1.8 colorama-0.4.6 daff-1.4.2 dbt-adapters-1.17.3 dbt-common-1.34.2 dbt-core-1.10.23 dbt-duckdb-1.9.4 dbt-extractor-0.6.0 dbt-protos-1.0.565 dbt-semantic-interfaces-0.9.0 deepdiff-8.6.2 duckdb-1.4.5 exceptiongroup-1.3.1 fastapi-0.115.6 h11-0.16.0 httptools-0.8.0 idna-3.19 importlib-metadata-8.7.1 isodate-0.6.1 jinja2-3.1.6 jsonschema-4.25.1 jsonschema-specifications-2025.9.1 leather-0.4.1 mashumaro-3.14 more-itertools-10.8.0 msgpack-1.1.2 networkx-3.2.1 numpy-2.0.2 orderly-set-5.5.0 packaging-26.3 pandas-2.2.3 parsedatetime-2.6 pathspec-0.12.1 protobuf-6.33.6 pydantic-2.10.4 pydantic-core-2.27.2 python-dateutil-2.9.0.post0 python-dotenv-1.0.1 python-slugify-8.0.4 pytimeparse-1.1.8 pytz-2026.3.post1 pyyaml-6.0.3 referencing-0.36.2 requests-2.32.5 rpds-py-0.27.1 scipy-1.13.1 six-1.17.0 snowplow-tracker-1.1.0 sqlparse-0.5.4 starlette-0.41.3 text-unidecode-1.3 typing-extensions-4.16.0 tzdata-2026.4 urllib3-2.6.3 uvicorn-0.34.0 uvloop-0.22.1 watchfiles-1.1.1 websockets-15.0.1 xgboost-2.1.3 zipp-3.23.1
+WARNING: You are using pip version 21.2.4; however, version 26.0.1 is available.
+You should consider upgrading via the '/Users/taz/enterprise-predictive-pipeline/.venv/bin/python3 -m pip install --upgrade pip' command.
+(.venv) taz@Atom enterprise-predictive-pipeline % python3 generate_mock_data.py
+
+Traceback (most recent call last):
+  File "/Users/taz/enterprise-predictive-pipeline/generate_mock_data.py", line 69, in <module>
+    main()
+  File "/Users/taz/enterprise-predictive-pipeline/generate_mock_data.py", line 22, in main
+    raise FileNotFoundError(
+FileNotFoundError: CSV files not found. Run generate_mock_data.py first.
+(.venv) taz@Atom enterprise-predictive-pipeline % nano generate_mock_data.py
+
+(.venv) taz@Atom enterprise-predictive-pipeline % python3 generate_mock_data.py
+
+Generating mock dataset...
+Successfully generated data/raw_customers.csv and data/raw_transactions.csv!
+(.venv) taz@Atom enterprise-predictive-pipeline % nano init_warehouse.py
+
+(.venv) taz@Atom enterprise-predictive-pipeline % python3 init_warehouse.py
+
+Initializing DuckDB analytical warehouse...
+Ingesting raw_customers.csv into database...
+Ingesting raw_transactions.csv into database...
+
+Warehouse Initialized Successfully!
+ -> Table 'main.raw_customers' populated with 100 rows.
+ -> Table 'main.raw_transactions' populated with 5000 rows.
+(.venv) taz@Atom enterprise-predictive-pipeline % nano dbt_project.yml
+
+(.venv) taz@Atom enterprise-predictive-pipeline % nano profiles.yml
+
+(.venv) taz@Atom enterprise-predictive-pipeline % nano warehouse/macros/rolling_window.sql
+
+(.venv) taz@Atom enterprise-predictive-pipeline % nano warehouse/models/staging/stg_transactions.sql
+
+(.venv) taz@Atom enterprise-predictive-pipeline % nano warehouse/models/marts/features/f_customer_behavior.sql
+
+(.venv) taz@Atom enterprise-predictive-pipeline % dbt run --profiles-dir .
+
+/Users/taz/enterprise-predictive-pipeline/.venv/lib/python3.9/site-packages/urllib3/__init__.py:35: NotOpenSSLWarning: urllib3 v2 only supports OpenSSL 1.1.1+, currently the 'ssl' module is compiled with 'LibreSSL 2.8.3'. See: https://github.com/urllib3/urllib3/issues/3020
+  warnings.warn(
+05:36:44  Running with dbt=1.10.23
+05:36:44  This version of dbt is deprecated and no longer receives regular patches, including for known bugs. We recommend upgrading to a newer supported version of dbt: https://docs.getdbt.com/docs/dbt-versions
+05:36:45  Registered adapter: duckdb=1.9.4
+05:36:45  Unable to do partial parsing because saved manifest not found. Starting full parse.
+05:36:45  Encountered an error:
+Compilation Error
+  Model 'model.warehouse.stg_transactions' (warehouse/models/staging/stg_transactions.sql) depends on a source named 'main.raw_transactions' which was not found
+(.venv) taz@Atom enterprise-predictive-pipeline % export PYTHONWARNINGS="ignore:urllib3"
+
+(.venv) taz@Atom enterprise-predictive-pipeline % nano warehouse/models/staging/stg_transactions.sql
+
+(.venv) taz@Atom enterprise-predictive-pipeline % dbt run --profiles-dir .
+
+05:37:42  Running with dbt=1.10.23
+05:37:42  This version of dbt is deprecated and no longer receives regular patches, including for known bugs. We recommend upgrading to a newer supported version of dbt: https://docs.getdbt.com/docs/dbt-versions
+05:37:42  Registered adapter: duckdb=1.9.4
+05:37:42  Unable to do partial parsing because saved manifest not found. Starting full parse.
+05:37:43  Found 2 models, 443 macros
+05:37:43  
+05:37:43  Concurrency: 1 threads (target='dev')
+05:37:43  
+05:37:43  1 of 2 START sql table model main.f_customer_behavior .......................... [RUN]
+05:37:43  1 of 2 OK created sql table model main.f_customer_behavior ..................... [OK in 0.03s]
+05:37:43  2 of 2 START sql view model main.stg_transactions .............................. [RUN]
+05:37:43  2 of 2 OK created sql view model main.stg_transactions ......................... [OK in 0.01s]
+05:37:43  
+05:37:43  Finished running 1 table model, 1 view model in 0 hours 0 minutes and 0.10 seconds (0.10s).
+05:37:43  
+05:37:43  Completed successfully
+05:37:43  
+05:37:43  Done. PASS=2 WARN=0 ERROR=0 SKIP=0 NO-OP=0 TOTAL=2
+(.venv) taz@Atom enterprise-predictive-pipeline % touch ml_service/training/train.py
+(.venv) taz@Atom enterprise-predictive-pipeline % nano ml_service/training/train.py
+(.venv) taz@Atom enterprise-predictive-pipeline % python3 ml_service/training/train.py
+
+🚀 Phase 3: Commencing Offline Dataset Build & Model Training...
+📋 Creating transaction labels table for historical evaluation...
+🔍 Executing Point-in-Time As-Of Join via SQL LATERAL seek...
+📊 Gathered 5000 rows for the training matrix.
+🛠️ Imputing missing metrics for cold-start customer vectors...
+🌲 Training features being evaluated: ['txn_count_1d', 'spend_7d', 'avg_amount_30d', 'is_imputed']
+⚖️ Fraud Class Balance: 
+is_fraud
+0    4724
+1     276
+Name: count, dtype: int64
+🏋️ Training XGBoost model ensemble...
+💾 Success! XGBoost model saved cleanly to: ml_service/models/artifacts/fraud_model.json
+(.venv) taz@Atom enterprise-predictive-pipeline % touch ml_service/api/app.py
+(.venv) taz@Atom enterprise-predictive-pipeline % nano ml_service/api/app.py
+(.venv) taz@Atom enterprise-predictive-pipeline % uvicorn ml_service.api.app:app --reload
+
+INFO:     Will watch for changes in these directories: ['/Users/taz/enterprise-predictive-pipeline']
+INFO:     Uvicorn running on http://127.0.0.1:8000 (Press CTRL+C to quit)
+INFO:     Started reloader process [18193] using WatchFiles
+INFO:     Started server process [18195]
+INFO:     Waiting for application startup.
+⏳ Initializing system infrastructure and loading model artifacts...
+🚀 Inference system is fully hot and ready for traffic.
+INFO:     Application startup complete.
+INFO:     127.0.0.1:53092 - "GET /docs HTTP/1.1" 200 OK
+INFO:     127.0.0.1:53092 - "GET /openapi.json HTTP/1.1" 200 OK
+INFO:     127.0.0.1:53094 - "GET /apple-touch-icon-precomposed.png HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:53094 - "GET /apple-touch-icon.png HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:53098 - "POST /api/v1/predict/fraud?customer_id=CUST_001 HTTP/1.1" 500 Internal Server Error
+ERROR:    Exception in ASGI application
+Traceback (most recent call last):
+  File "/Users/taz/enterprise-predictive-pipeline/.venv/lib/python3.9/site-packages/uvicorn/protocols/http/httptools_impl.py", line 409, in run_asgi
+    result = await app(  # type: ignore[func-returns-value]
+  File "/Users/taz/enterprise-predictive-pipeline/.venv/lib/python3.9/site-packages/uvicorn/middleware/proxy_headers.py", line 60, in __call__
+    return await self.app(scope, receive, send)
+  File "/Users/taz/enterprise-predictive-pipeline/.venv/lib/python3.9/site-packages/fastapi/applications.py", line 1054, in __call__
+    await super().__call__(scope, receive, send)
+  File "/Users/taz/enterprise-predictive-pipeline/.venv/lib/python3.9/site-packages/starlette/applications.py", line 113, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "/Users/taz/enterprise-predictive-pipeline/.venv/lib/python3.9/site-packages/starlette/middleware/errors.py", line 187, in __call__
+    raise exc
+  File "/Users/taz/enterprise-predictive-pipeline/.venv/lib/python3.9/site-packages/starlette/middleware/errors.py", line 165, in __call__
+    await self.app(scope, receive, _send)
+  File "/Users/taz/enterprise-predictive-pipeline/.venv/lib/python3.9/site-packages/starlette/middleware/exceptions.py", line 62, in __call__
+    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+  File "/Users/taz/enterprise-predictive-pipeline/.venv/lib/python3.9/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "/Users/taz/enterprise-predictive-pipeline/.venv/lib/python3.9/site-packages/starlette/_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "/Users/taz/enterprise-predictive-pipeline/.venv/lib/python3.9/site-packages/starlette/routing.py", line 715, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "/Users/taz/enterprise-predictive-pipeline/.venv/lib/python3.9/site-packages/starlette/routing.py", line 735, in app
+    await route.handle(scope, receive, send)
+  File "/Users/taz/enterprise-predictive-pipeline/.venv/lib/python3.9/site-packages/starlette/routing.py", line 288, in handle
+    await self.app(scope, receive, send)
+  File "/Users/taz/enterprise-predictive-pipeline/.venv/lib/python3.9/site-packages/starlette/routing.py", line 76, in app
+    await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+  File "/Users/taz/enterprise-predictive-pipeline/.venv/lib/python3.9/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "/Users/taz/enterprise-predictive-pipeline/.venv/lib/python3.9/site-packages/starlette/_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "/Users/taz/enterprise-predictive-pipeline/.venv/lib/python3.9/site-packages/starlette/routing.py", line 73, in app
+    response = await f(request)
+  File "/Users/taz/enterprise-predictive-pipeline/.venv/lib/python3.9/site-packages/fastapi/routing.py", line 301, in app
+    raw_response = await run_endpoint_function(
+  File "/Users/taz/enterprise-predictive-pipeline/.venv/lib/python3.9/site-packages/fastapi/routing.py", line 214, in run_endpoint_function
+    return await run_in_threadpool(dependant.call, **values)
+  File "/Users/taz/enterprise-predictive-pipeline/.venv/lib/python3.9/site-packages/starlette/concurrency.py", line 39, in run_in_threadpool
+    return await anyio.to_thread.run_sync(func, *args)
+  File "/Users/taz/enterprise-predictive-pipeline/.venv/lib/python3.9/site-packages/anyio/to_thread.py", line 63, in run_sync
+    return await get_async_backend().run_sync_in_worker_thread(
+  File "/Users/taz/enterprise-predictive-pipeline/.venv/lib/python3.9/site-packages/anyio/_backends/_asyncio.py", line 2502, in run_sync_in_worker_thread
+    return await future
+  File "/Users/taz/enterprise-predictive-pipeline/.venv/lib/python3.9/site-packages/anyio/_backends/_asyncio.py", line 986, in run
+    result = context.run(func, *args)
+  File "/Users/taz/enterprise-predictive-pipeline/ml_service/api/app.py", line 110, in predict_fraud
+    raw_prediction = model_artifact.predict(dmatrix)[0]
+  File "/Users/taz/enterprise-predictive-pipeline/.venv/lib/python3.9/site-packages/xgboost/core.py", line 2359, in predict
+    self._validate_features(fn)
+  File "/Users/taz/enterprise-predictive-pipeline/.venv/lib/python3.9/site-packages/xgboost/core.py", line 3051, in _validate_features
+    raise ValueError(
+ValueError: training data did not have the following fields: txn_count_1d, spend_7d, avg_amount_30d, is_imputed
+^CINFO:     Shutting down
+INFO:     Waiting for application shutdown.
+🛑 Database connection pool closed safely.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [18195]
+INFO:     Stopping reloader process [18193]
+(.venv) taz@Atom enterprise-predictive-pipeline % nano ml_service/api/app.py
+
+(.venv) taz@Atom enterprise-predictive-pipeline % uvicorn ml_service.api.app:app --reload
+
+INFO:     Will watch for changes in these directories: ['/Users/taz/enterprise-predictive-pipeline']
+INFO:     Uvicorn running on http://127.0.0.1:8000 (Press CTRL+C to quit)
+INFO:     Started reloader process [18267] using WatchFiles
+INFO:     Started server process [18269]
+INFO:     Waiting for application startup.
+⏳ Initializing system infrastructure and loading model artifacts...
+🚀 Inference system is fully hot and ready for traffic.
+INFO:     Application startup complete.
+INFO:     127.0.0.1:53100 - "GET /docs HTTP/1.1" 200 OK
+INFO:     127.0.0.1:53100 - "GET /openapi.json HTTP/1.1" 200 OK
+INFO:     127.0.0.1:53102 - "POST /api/v1/predict/fraud?customer_id=CUST_001 HTTP/1.1" 200 OK
+^CINFO:     Shutting down
+INFO:     Waiting for application shutdown.
+🛑 Database connection pool closed safely.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [18269]
+INFO:     Stopping reloader process [18267]
+(.venv) taz@Atom enterprise-predictive-pipeline % touch ml_service/api/dashboard.py
+(.venv) taz@Atom enterprise-predictive-pipeline % nano ml_service/api/dashboard.py
+(.venv) taz@Atom enterprise-predictive-pipeline % cd /Users/taz/enterprise-predictive-pipeline
+(.venv) taz@Atom enterprise-predictive-pipeline % source .venv/bin/activate
+(.venv) taz@Atom enterprise-predictive-pipeline % streamlit run ml_service/api/dashboard.py
+zsh: command not found: streamlit
+(.venv) taz@Atom enterprise-predictive-pipeline % pip install streamlit
+
+Collecting streamlit
+  Using cached streamlit-1.50.0-py3-none-any.whl (10.1 MB)
+Collecting toml<2,>=0.10.1
+  Using cached toml-0.10.2-py2.py3-none-any.whl (16 kB)
+Collecting cachetools<7,>=4.0
+  Using cached cachetools-6.2.6-py3-none-any.whl (11 kB)
+Collecting pyarrow>=7.0
+  Using cached pyarrow-21.0.0-cp39-cp39-macosx_12_0_arm64.whl (31.2 MB)
+Requirement already satisfied: numpy<3,>=1.23 in ./.venv/lib/python3.9/site-packages (from streamlit) (2.0.2)
+Requirement already satisfied: protobuf<7,>=3.20 in ./.venv/lib/python3.9/site-packages (from streamlit) (6.33.6)
+Collecting pydeck<1,>=0.8.0b4
+  Downloading pydeck-0.9.3-py2.py3-none-any.whl (11.4 MB)
+     |████████████████████████████████| 11.4 MB 4.1 MB/s 
+Requirement already satisfied: click<9,>=7.0 in ./.venv/lib/python3.9/site-packages (from streamlit) (8.1.8)
+Collecting altair!=5.4.0,!=5.4.1,<6,>=4.0
+  Using cached altair-5.5.0-py3-none-any.whl (731 kB)
+Collecting tenacity<10,>=8.1.0
+  Using cached tenacity-9.1.2-py3-none-any.whl (28 kB)
+Collecting tornado!=6.5.0,<7,>=6.0.3
+  Downloading tornado-6.5.10-cp39-abi3-macosx_10_9_universal2.whl (465 kB)
+     |████████████████████████████████| 465 kB 5.1 MB/s 
+Collecting blinker<2,>=1.5.0
+  Using cached blinker-1.9.0-py3-none-any.whl (8.5 kB)
+Collecting packaging<26,>=20
+  Using cached packaging-25.0-py3-none-any.whl (66 kB)
+Requirement already satisfied: typing-extensions<5,>=4.4.0 in ./.venv/lib/python3.9/site-packages (from streamlit) (4.16.0)
+Requirement already satisfied: pandas<3,>=1.4.0 in ./.venv/lib/python3.9/site-packages (from streamlit) (2.2.3)
+Requirement already satisfied: requests<3,>=2.27 in ./.venv/lib/python3.9/site-packages (from streamlit) (2.32.5)
+Collecting pillow<12,>=7.1.0
+  Using cached pillow-11.3.0-cp39-cp39-macosx_11_0_arm64.whl (4.7 MB)
+Collecting gitpython!=3.1.19,<4,>=3.0.7
+  Downloading gitpython-3.1.62-py3-none-any.whl (222 kB)
+     |████████████████████████████████| 222 kB 5.8 MB/s 
+Requirement already satisfied: jinja2 in ./.venv/lib/python3.9/site-packages (from altair!=5.4.0,!=5.4.1,<6,>=4.0->streamlit) (3.1.6)
+Requirement already satisfied: jsonschema>=3.0 in ./.venv/lib/python3.9/site-packages (from altair!=5.4.0,!=5.4.1,<6,>=4.0->streamlit) (4.25.1)
+Collecting narwhals>=1.14.2
+  Downloading narwhals-2.21.0-py3-none-any.whl (451 kB)
+     |████████████████████████████████| 451 kB 5.0 MB/s 
+Collecting gitdb<5,>=4.0.1
+  Using cached gitdb-4.0.12-py3-none-any.whl (62 kB)
+Collecting smmap<6,>=3.0.1
+  Downloading smmap-5.0.3-py3-none-any.whl (24 kB)
+Requirement already satisfied: rpds-py>=0.7.1 in ./.venv/lib/python3.9/site-packages (from jsonschema>=3.0->altair!=5.4.0,!=5.4.1,<6,>=4.0->streamlit) (0.27.1)
+Requirement already satisfied: jsonschema-specifications>=2023.03.6 in ./.venv/lib/python3.9/site-packages (from jsonschema>=3.0->altair!=5.4.0,!=5.4.1,<6,>=4.0->streamlit) (2025.9.1)
+Requirement already satisfied: referencing>=0.28.4 in ./.venv/lib/python3.9/site-packages (from jsonschema>=3.0->altair!=5.4.0,!=5.4.1,<6,>=4.0->streamlit) (0.36.2)
+Requirement already satisfied: attrs>=22.2.0 in ./.venv/lib/python3.9/site-packages (from jsonschema>=3.0->altair!=5.4.0,!=5.4.1,<6,>=4.0->streamlit) (26.1.0)
+Requirement already satisfied: tzdata>=2022.7 in ./.venv/lib/python3.9/site-packages (from pandas<3,>=1.4.0->streamlit) (2026.4)
+Requirement already satisfied: python-dateutil>=2.8.2 in ./.venv/lib/python3.9/site-packages (from pandas<3,>=1.4.0->streamlit) (2.9.0.post0)
+Requirement already satisfied: pytz>=2020.1 in ./.venv/lib/python3.9/site-packages (from pandas<3,>=1.4.0->streamlit) (2026.3.post1)
+Requirement already satisfied: MarkupSafe>=2.0 in ./.venv/lib/python3.9/site-packages (from jinja2->altair!=5.4.0,!=5.4.1,<6,>=4.0->streamlit) (3.0.3)
+Requirement already satisfied: six>=1.5 in ./.venv/lib/python3.9/site-packages (from python-dateutil>=2.8.2->pandas<3,>=1.4.0->streamlit) (1.17.0)
+Requirement already satisfied: charset_normalizer<4,>=2 in ./.venv/lib/python3.9/site-packages (from requests<3,>=2.27->streamlit) (3.5.1)
+Requirement already satisfied: urllib3<3,>=1.21.1 in ./.venv/lib/python3.9/site-packages (from requests<3,>=2.27->streamlit) (2.6.3)
+Requirement already satisfied: certifi>=2017.4.17 in ./.venv/lib/python3.9/site-packages (from requests<3,>=2.27->streamlit) (2026.7.22)
+Requirement already satisfied: idna<4,>=2.5 in ./.venv/lib/python3.9/site-packages (from requests<3,>=2.27->streamlit) (3.19)
+Installing collected packages: smmap, packaging, narwhals, gitdb, tornado, toml, tenacity, pydeck, pyarrow, pillow, gitpython, cachetools, blinker, altair, streamlit
+  Attempting uninstall: packaging
+    Found existing installation: packaging 26.3
+    Uninstalling packaging-26.3:
+      Successfully uninstalled packaging-26.3
+Successfully installed altair-5.5.0 blinker-1.9.0 cachetools-6.2.6 gitdb-4.0.12 gitpython-3.1.62 narwhals-2.21.0 packaging-25.0 pillow-11.3.0 pyarrow-21.0.0 pydeck-0.9.3 smmap-5.0.3 streamlit-1.50.0 tenacity-9.1.2 toml-0.10.2 tornado-6.5.10
+WARNING: You are using pip version 21.2.4; however, version 26.0.1 is available.
+You should consider upgrading via the '/Users/taz/enterprise-predictive-pipeline/.venv/bin/python3 -m pip install --upgrade pip' command.
+(.venv) taz@Atom enterprise-predictive-pipeline % streamlit run ml_service/api/dashboard.py
+
+
+  You can now view your Streamlit app in your browser.
+
+  Local URL: http://localhost:8501
+  Network URL: http://192.168.18.234:8501
+
+  For better performance, install the Watchdog module:
+
+  $ xcode-select --install
+  $ pip install watchdog
+            
+^C  Stopping...
+(.venv) taz@Atom enterprise-predictive-pipeline % nano ml_service/api/dashboard.py
+
+(.venv) taz@Atom enterprise-predictive-pipeline % nano Makefile
+
+(.venv) taz@Atom enterprise-predictive-pipeline % make dashboard
+
+. .venv/bin/activate && streamlit run ml_service/api/dashboard.py
+
+  You can now view your Streamlit app in your browser.
+
+  Local URL: http://localhost:8501
+  Network URL: http://192.168.18.234:8501
+
+  For better performance, install the Watchdog module:
+
+  $ xcode-select --install
+  $ pip install watchdog
+            
+^C  Stopping...
+
+(.venv) taz@Atom enterprise-predictive-pipeline % nano ml_service/api/dashboard.py
+
+(.venv) taz@Atom enterprise-predictive-pipeline % streamlit run ml_service/api/dashboard.py
+
+  You can now view your Streamlit app in your browser.
+
+  Local URL: http://localhost:8501
+  Network URL: http://192.168.18.234:8501
+
+  For better performance, install the Watchdog module:
+
+  $ xcode-select --install
+  $ pip install watchdog
+            
+2026-09-17 11:33:55.199 Uncaught app execution
+Traceback (most recent call last):
+  File "/Users/taz/enterprise-predictive-pipeline/.venv/lib/python3.9/site-packages/streamlit/runtime/scriptrunner/exec_code.py", line 128, in exec_func_with_error_handling
+    result = func()
+  File "/Users/taz/enterprise-predictive-pipeline/.venv/lib/python3.9/site-packages/streamlit/runtime/scriptrunner/script_runner.py", line 669, in code_to_exec
+    exec(code, module.__dict__)  # noqa: S102
+  File "/Users/taz/enterprise-predictive-pipeline/ml_service/api/dashboard.py", line 34, in <module>
+    col1, col2 = st.columns()
+  File "/Users/taz/enterprise-predictive-pipeline/.venv/lib/python3.9/site-packages/streamlit/runtime/metrics_util.py", line 443, in wrapped_func
+    result = non_optional_func(*args, **kwargs)
+TypeError: columns() missing 1 required positional argument: 'spec'
+^C  Stopping...
+(.venv) taz@Atom enterprise-predictive-pipeline % make serve
+
+. .venv/bin/activate && uvicorn ml_service.api.app:app --reload
+INFO:     Will watch for changes in these directories: ['/Users/taz/enterprise-predictive-pipeline']
+INFO:     Uvicorn running on http://127.0.0.1:8000 (Press CTRL+C to quit)
+INFO:     Started reloader process [18334] using WatchFiles
+INFO:     Started server process [18336]
+INFO:     Waiting for application startup.
+⏳ Initializing system infrastructure and loading model artifacts...
+🚀 Inference system is fully hot and ready for traffic.
+INFO:     Application startup complete.
+^CINFO:     Shutting down
+INFO:     Waiting for application shutdown.
+🛑 Database connection pool closed safely.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [18336]
+INFO:     Stopping reloader process [18334]
+
+(.venv) taz@Atom enterprise-predictive-pipeline % nano ml_service/api/dashboard.py
+
+(.venv) taz@Atom enterprise-predictive-pipeline % make serve
+. .venv/bin/activate && uvicorn ml_service.api.app:app --reload
+INFO:     Will watch for changes in these directories: ['/Users/taz/enterprise-predictive-pipeline']
+INFO:     Uvicorn running on http://127.0.0.1:8000 (Press CTRL+C to quit)
+INFO:     Started reloader process [18395] using WatchFiles
+INFO:     Started server process [18397]
+INFO:     Waiting for application startup.
+⏳ Initializing system infrastructure and loading model artifacts...
+🚀 Inference system is fully hot and ready for traffic.
+INFO:     Application startup complete.
+^Oçç
+ç^CINFO:     Shutting down
+INFO:     Waiting for application shutdown.
+🛑 Database connection pool closed safely.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [18397]
+INFO:     Stopping reloader process [18395]
+
+(.venv) taz@Atom enterprise-predictive-pipeline % nano ml_service/api/dashboard.py
+
+(.venv) taz@Atom enterprise-predictive-pipeline % make serve
+. .venv/bin/activate && uvicorn ml_service.api.app:app --reload
+INFO:     Will watch for changes in these directories: ['/Users/taz/enterprise-predictive-pipeline']
+INFO:     Uvicorn running on http://127.0.0.1:8000 (Press CTRL+C to quit)
+INFO:     Started reloader process [18439] using WatchFiles
+INFO:     Started server process [18441]
+INFO:     Waiting for application startup.
+⏳ Initializing system infrastructure and loading model artifacts...
+🚀 Inference system is fully hot and ready for traffic.
+INFO:     Application startup complete.
+^CINFO:     Shutting down
+INFO:     Waiting for application shutdown.
+🛑 Database connection pool closed safely.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [18441]
+INFO:     Stopping reloader process [18439]
+
+(.venv) taz@Atom enterprise-predictive-pipeline % kill -9 $(lsof -t -i:8501) 2>/dev/null || true
+
+(.venv) taz@Atom enterprise-predictive-pipeline % rm -rf ~/.streamlit/cache
+
+(.venv) taz@Atom enterprise-predictive-pipeline % make dashboard
+
+. .venv/bin/activate && streamlit run ml_service/api/dashboard.py
+
+  You can now view your Streamlit app in your browser.
+
+  Local URL: http://localhost:8501
+  Network URL: http://192.168.18.234:8501
+
+  For better performance, install the Watchdog module:
+
+  $ xcode-select --install
+  $ pip install watchdog
+            
+^C  Stopping...
+
+(.venv) taz@Atom enterprise-predictive-pipeline % nano ml_service/api/dashboard.py
+
+(.venv) taz@Atom enterprise-predictive-pipeline % make serve
+
+. .venv/bin/activate && uvicorn ml_service.api.app:app --reload
+INFO:     Will watch for changes in these directories: ['/Users/taz/enterprise-predictive-pipeline']
+INFO:     Uvicorn running on http://127.0.0.1:8000 (Press CTRL+C to quit)
+INFO:     Started reloader process [18616] using WatchFiles
+INFO:     Started server process [18618]
+INFO:     Waiting for application startup.
+⏳ Initializing system infrastructure and loading model artifacts...
+🚀 Inference system is fully hot and ready for traffic.
+INFO:     Application startup complete.
+INFO:     127.0.0.1:54741 - "POST /api/v1/predict/fraud?customer_id=CUST_001 HTTP/1.1" 200 OK
+WARNING:  WatchFiles detected changes in 'ml_service/api/dashboard.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+🛑 Database connection pool closed safely.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [18618]
+INFO:     Started server process [18678]
+INFO:     Waiting for application startup.
+⏳ Initializing system infrastructure and loading model artifacts...
+🚀 Inference system is fully hot and ready for traffic.
+INFO:     Application startup complete.
+^CINFO:     Shutting down
+INFO:     Waiting for application shutdown.
+🛑 Database connection pool closed safely.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [18678]
+INFO:     Stopping reloader process [18616]
+
+(.venv) taz@Atom enterprise-predictive-pipeline % make serve
+. .venv/bin/activate && uvicorn ml_service.api.app:app --reload
+INFO:     Will watch for changes in these directories: ['/Users/taz/enterprise-predictive-pipeline']
+INFO:     Uvicorn running on http://127.0.0.1:8000 (Press CTRL+C to quit)
+INFO:     Started reloader process [18687] using WatchFiles
+INFO:     Started server process [18689]
+INFO:     Waiting for application startup.
+⏳ Initializing system infrastructure and loading model artifacts...
+🚀 Inference system is fully hot and ready for traffic.
+INFO:     Application startup complete.
+INFO:     127.0.0.1:54945 - "POST /api/v1/predict/fraud?customer_id=CUST_001 HTTP/1.1" 200 OK
+^CINFO:     Shutting down
+INFO:     Waiting for application shutdown.
+🛑 Database connection pool closed safely.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [18689]
+INFO:     Stopping reloader process [18687]
+
+(.venv) taz@Atom enterprise-predictive-pipeline % cd /Users/taz/enterprise-predictive-pipeline
+(.venv) taz@Atom enterprise-predictive-pipeline % git add .
+fatal: not a git repository (or any of the parent directories): .git
+(.venv) taz@Atom enterprise-predictive-pipeline % git init
+Initialized empty Git repository in /Users/taz/enterprise-predictive-pipeline/.git/
+(.venv) taz@Atom enterprise-predictive-pipeline % git add .
+(.venv) taz@Atom enterprise-predictive-pipeline % git commit -m "feat: complete end-to-end temporal feature platform with dbt and professional metrics UI"
+
+[main (root-commit) 34e0220] feat: complete end-to-end temporal feature platform with dbt and professional metrics UI
+ Committer: Sartaj Singh Virdi <taz@Atom.local>
+Your name and email address were configured automatically based
+on your username and hostname. Please check that they are accurate.
+You can suppress this message by setting them explicitly. Run the
+following command and follow the instructions in your editor to edit
+your configuration file:
+
+    git config --global --edit
+
+After doing this, you may fix the identity used for this commit with:
+
+    git commit --amend --reset-author
+
+ 14 files changed, 587 insertions(+)
+ create mode 100644 .gitignore
+ create mode 100644 Makefile
+ create mode 100644 dbt_project.yml
+ create mode 100644 generate_mock_data.py
+ create mode 100644 init_warehouse.py
+ create mode 100644 ml_service/api/app.py
+ create mode 100644 ml_service/api/dashboard.py
+ create mode 100644 ml_service/models/artifacts/fraud_model.json
+ create mode 100644 ml_service/training/train.py
+ create mode 100644 profiles.yml
+ create mode 100644 requirements.txt
+ create mode 100644 warehouse/macros/rolling_window.sql
+ create mode 100644 warehouse/models/marts/features/f_customer_behavior.sql
+ create mode 100644 warehouse/models/staging/stg_transactions.sql
+(.venv) taz@Atom enterprise-predictive-pipeline % git branch -M main
+(.venv) taz@Atom enterprise-predictive-pipeline % git remote add origin https://github.com
+
+(.venv) taz@Atom enterprise-predictive-pipeline % git push -u origin main
+
+fatal: repository 'https://github.com/' not found
+(.venv) taz@Atom enterprise-predictive-pipeline % git remote remove origin
+(.venv) taz@Atom enterprise-predictive-pipeline % git remote add origin https://github.com
+
+(.venv) taz@Atom enterprise-predictive-pipeline % git branch -M main
+(.venv) taz@Atom enterprise-predictive-pipeline % git push -u origin main
+fatal: repository 'https://github.com/' not found
+(.venv) taz@Atom enterprise-predictive-pipeline % git remote set-url origin https://github.com
+(.venv) taz@Atom enterprise-predictive-pipeline % git push -u origin main
+fatal: repository 'https://github.com/' not found
+(.venv) taz@Atom enterprise-predictive-pipeline % git remote set-url origin https://github.com/SartajVirdi/enterprise-predictive-pipeline.git
+
+(.venv) taz@Atom enterprise-predictive-pipeline % git fetch origin
+remote: Enumerating objects: 3, done.
+remote: Counting objects: 100% (3/3), done.
+remote: Compressing objects: 100% (2/2), done.
+remote: Total 3 (delta 0), reused 0 (delta 0), pack-reused 0 (from 0)
+Unpacking objects: 100% (3/3), 1.43 KiB | 366.00 KiB/s, done.
+From https://github.com/SartajVirdi/enterprise-predictive-pipeline
+ * [new branch]      main       -> origin/main
+(.venv) taz@Atom enterprise-predictive-pipeline % git merge origin/main --allow-unrelated-histories -m "merge: combine local pipeline commit with GitHub README/license"
+
+
+Merge made by the 'ort' strategy.
+ LICENSE | 21 +++++++++++++++++++++
+ 1 file changed, 21 insertions(+)
+ create mode 100644 LICENSE
+(.venv) taz@Atom enterprise-predictive-pipeline % git branch -M main
+(.venv) taz@Atom enterprise-predictive-pipeline % git push -u origin main
+remote: Invalid username or token. Password authentication is not supported for Git operations.
+fatal: Authentication failed for 'https://github.com/SartajVirdi/enterprise-predictive-pipeline.git/'
+(.venv) taz@Atom enterprise-predictive-pipeline % git push -u origin main
+Username for 'https://github.com': SartajVirdi
+Password for 'https://SartajVirdi@github.com': 
+remote: Invalid username or token. Password authentication is not supported for Git operations.
+fatal: Authentication failed for 'https://github.com/SartajVirdi/enterprise-predictive-pipeline.git/'
+(.venv) taz@Atom enterprise-predictive-pipeline % git push -u origin main
+Username for 'https://github.com': SartajVirdi
+Password for 'https://SartajVirdi@github.com': 
+Enumerating objects: 30, done.
+Counting objects: 100% (30/30), done.
+Delta compression using up to 10 threads
+Compressing objects: 100% (23/23), done.
+Writing objects: 100% (29/29), 46.00 KiB | 9.20 MiB/s, done.
+Total 29 (delta 1), reused 0 (delta 0), pack-reused 0 (from 0)
+remote: Resolving deltas: 100% (1/1), done.
+To https://github.com/SartajVirdi/enterprise-predictive-pipeline.git
+   727c8b3..f24ba54  main -> main
+branch 'main' set up to track 'origin/main'.
+(.venv) taz@Atom enterprise-predictive-pipeline % 
