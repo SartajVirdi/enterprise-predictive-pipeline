@@ -6,13 +6,15 @@
 
 All feature engineering lives in dbt models on top of DuckDB — the exact same logic runs at training time and at inference time, so there's no train/serve skew.
 
-[![Python](https://img.shields.io/badge/Python-3.9-3776AB?logo=python&logoColor=white)](https://www.python.org/)
+[![Live Demo](https://img.shields.io/badge/Live%20Demo-Open%20App-FF4B4B?logo=streamlit&logoColor=white)](https://enterprise-fraud-analytics.streamlit.app)
+[![Python](https://img.shields.io/badge/Python-3.9%2B-3776AB?logo=python&logoColor=white)](https://www.python.org/)
 [![dbt](https://img.shields.io/badge/dbt-Core-FF694B?logo=dbt&logoColor=white)](https://www.getdbt.com/)
 [![DuckDB](https://img.shields.io/badge/DuckDB-OLAP-FFF000?logo=duckdb&logoColor=black)](https://duckdb.org/)
 [![XGBoost](https://img.shields.io/badge/XGBoost-Model-red)](https://xgboost.readthedocs.io/)
 [![FastAPI](https://img.shields.io/badge/FastAPI-Backend-009688?logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com/)
-[![Streamlit](https://img.shields.io/badge/Streamlit-Dashboard-FF4B4B?logo=streamlit&logoColor=white)](https://streamlit.io/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+
+**[→ Try the live dashboard](https://enterprise-fraud-analytics.streamlit.app)**
 
 </div>
 
@@ -20,13 +22,25 @@ All feature engineering lives in dbt models on top of DuckDB — the exact same 
 
 ## 📖 Table of Contents
 
+- [Screenshots](#-screenshots)
 - [How It Works](#-how-it-works)
 - [Highlights](#-highlights)
 - [Project Structure](#-project-structure)
 - [Getting Started](#-getting-started)
-- [Screenshots](#-screenshots)
 - [Tech Stack](#-tech-stack)
 - [License](#-license)
+
+---
+
+## 🖼️ Screenshots
+
+**Live risk evaluation against the feature store**
+
+![Dashboard with an active customer](assets/im1.png)
+
+**Cold-start path — unseen customer, imputed feature vector**
+
+![Cold-start simulation](assets/im2.png)
 
 ---
 
@@ -79,13 +93,17 @@ enterprise-predictive-pipeline/
 │   ├── models/artifacts/          # serialized model
 │   └── api/
 │       ├── app.py                 # FastAPI inference endpoint
-│       └── dashboard.py           # Streamlit dashboard
+│       ├── dashboard.py           # Streamlit dashboard (local, calls the API)
+│       └── dashboard_cloud.py     # Streamlit dashboard (deployed, in-process)
+├── assets/                        # README screenshots
 ├── generate_mock_data.py          # synthetic transaction data
 ├── init_warehouse.py              # loads raw data into DuckDB
+├── warehouse_demo.db              # bundled demo database for the live app
 ├── dbt_project.yml
 ├── profiles.yml
 ├── Makefile
-└── requirements.txt
+├── requirements.txt               # slim deps for the deployed dashboard
+└── requirements-dev.txt           # full local stack (dbt, FastAPI, uvicorn)
 ```
 
 ---
@@ -110,16 +128,7 @@ make dashboard   # Streamlit UI     → http://localhost:8501
 
 API docs (Swagger UI) are available at `http://127.0.0.1:8000/docs` once the backend is running.
 
----
-
-## 🖼️ Screenshots
-
-> _Coming soon — dashboard screenshots will be added here once deployed on Streamlit Community Cloud._
-
-<!--
-![Dashboard overview](docs/images/dashboard-overview.png)
-![Risk evaluation result](docs/images/risk-evaluation.png)
--->
+> **Note on the two dashboards:** `dashboard.py` is the local development version — it calls the FastAPI service over HTTP, keeping the two layers decoupled. `dashboard_cloud.py` is the deployed variant: Streamlit Community Cloud runs a single process, so it executes the same inference logic in-process instead of over the network.
 
 ---
 
