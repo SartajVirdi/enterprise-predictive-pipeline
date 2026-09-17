@@ -1,0 +1,19 @@
+name: 'warehouse'
+version: '1.0.0'
+config-version: 2
+
+profile: 'warehouse_profile'
+
+model-paths: ["warehouse/models"]
+macro-paths: ["warehouse/macros"]
+snapshot-paths: ["warehouse/snapshots"]
+test-paths: ["warehouse/tests"]
+
+models:
+  warehouse:
+    staging:
+      materialized: view
+    marts:
+      features:
+        materialized: table
+

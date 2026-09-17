@@ -1,0 +1,45 @@
+# macOS system files
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+.Spotlight-V100
+.Trashes
+
+# Python environments
+.venv/
+venv/
+env/
+ENV/
+__pycache__/
+*.py[cod]
+*.pyo
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Data artifacts
+data/*.csv
+warehouse.db
+*.duckdb
+
+# IDE configs
+.vscode/
+.idea/
+
+# dbt
+logs/
+target/
+dbt_packages/
+dbt_modules/
+.user.yml
+
+# Env vars / secrets
+.env
+.env.*
+
+# Jupyter
+.ipynb_checkpoints/
+
+# OS misc
+Thumbs.db

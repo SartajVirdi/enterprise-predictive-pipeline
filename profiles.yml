@@ -1,0 +1,8 @@
+warehouse_profile:
+  target: dev
+  outputs:
+    dev:
+      type: duckdb
+      path: warehouse.db
+      schema: main
+
